@@ -18,7 +18,7 @@
 
         // Fonction pour charger et afficher les noms depuis le fichier JSON
         function displayNames() {
-            fetch('data.json')
+            fetch('https://pronostics-qremion.github.io/data.json')
                 .then(response => response.json())
                 .then(data => {
                     namesData = data.names || []; // Charger les noms depuis le fichier JSON
@@ -69,19 +69,19 @@
 
         // Fonction pour enregistrer les données dans le fichier JSON
         function saveNamesToFile() {
-            fetch('data.json', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ names: namesData })
-            })
-            .then(() => {
-                displayNames(); // Rafraîchir l'affichage après la modification
-                console.log("Données enregistrées avec succès dans le fichier JSON");
-            })
-            .catch(error => console.error('Erreur lors de l\'enregistrement des données :', error));
-        }
+    fetch('https://pronostics-qremion.github.io/data.json', {
+        method: 'POST', // Utilisez POST au lieu de PUT
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ names: namesData })
+    })
+    .then(() => {
+        displayNames(); // Rafraîchir l'affichage après la modification
+        console.log("Données enregistrées avec succès dans le fichier JSON");
+    })
+    .catch(error => console.error('Erreur lors de l\'enregistrement des données :', error));
+}
     </script>
 </body>
 </html>
