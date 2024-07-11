@@ -1,23 +1,47 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - Site de Pronostics</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Ajouter des Noms</title>
+    <script src="https://www.gstatic.com/firebasejs/9.2.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.2.0/firebase-database.js"></script>
 </head>
 <body>
-    <h1>Connexion</h1>
-    <form id="login-form">
-        <label for="email">Email :</label>
-        <input type="email" id="email" required>
-        <label for="password">Mot de passe :</label>
-        <input type="password" id="password" required>
-        <button type="submit">Se connecter</button>
+    <h1>Ajouter des Noms</h1>
+    <form id="nameForm">
+        <input type="text" id="nameInput" placeholder="Entrez un nom" required>
+        <button type="submit">Ajouter</button>
     </form>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="auth.js"></script>
+    <script>
+        // TODO: Remplacez par votre configuration Firebase
+        const firebaseConfig = {
+  apiKey: "AIzaSyDI0cbzMu2Vq8L5k8aHsg_DlN44FooQQMU",
+  authDomain: "pronostic-8ae12.firebaseapp.com",
+  databaseURL: "https://pronostic-8ae12-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "pronostic-8ae12",
+  storageBucket: "pronostic-8ae12.appspot.com",
+  messagingSenderId: "148980466002",
+  appId: "1:148980466002:web:77add21acbac2132047a8b"
+};
+
+
+        // Initialiser Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Référence à la base de données pour les noms
+        const namesRef = database.ref('names');
+
+        // Ajouter un nom à la base de données
+        document.getElementById('nameForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('nameInput').value;
+            namesRef.push().set({
+                name: name
+            });
+            document.getElementById('nameForm').reset();
+        });
+    </script>
 </body>
 </html>
