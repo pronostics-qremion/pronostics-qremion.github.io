@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter des Noms</title>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-database-compat.js"></script>
+    <script>
+        // Remplacez par votre configuration Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDI0cbzMu2Vq8L5k8aHsg_DlN44FooQQMU",
+            authDomain: "pronostic-8ae12.firebaseapp.com",
+            databaseURL: "https://pronostic-8ae12-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pronostic-8ae12",
+            storageBucket: "pronostic-8ae12.appspot.com",
+            messagingSenderId: "148980466002",
+            appId: "1:148980466002:web:77add21acbac2132047a8b"
+        };
+
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body>
     <h1>Ajouter des Noms</h1>
@@ -13,75 +30,71 @@
     </form>
     <ul id="namesList"></ul>
     <script>
-        // Fonctions pour gérer les données JSON localement
-        let namesData = []; // Variable globale pour stocker les noms
+        document.addEventListener('DOMContentLoaded', function() {
+            const database = firebase.database();
+            const namesRef = database.ref('names');
 
-        // Fonction pour charger et afficher les noms depuis le fichier JSON
-        function displayNames() {
-            fetch('https://pronostics-qremion.github.io/data.json')
-                .then(response => response.json())
-                .then(data => {
-                    namesData = data.names || []; // Charger les noms depuis le fichier JSON
+            // Fonction pour afficher les noms
+            function displayNames() {
+                namesRef.on('value', (snapshot) => {
                     const namesList = document.getElementById('namesList');
                     namesList.innerHTML = ''; // Vider la liste avant de la remplir
-                    namesData.forEach((item, index) => {
+                    snapshot.forEach((childSnapshot) => {
+                        const key = childSnapshot.key;
+                        const childData = childSnapshot.val();
                         const li = document.createElement('li');
                         li.innerHTML = `
-                            <span>${item.name}</span>
-                            <button onclick="editName(${index})">Editer</button>
-                            <button onclick="deleteName(${index})">Supprimer</button>
+                            <span>${childData.name}</span>
+                            <button onclick="editName('${key}', '${childData.name}')">Editer</button>
+                            <button onclick="deleteName('${key}')">Supprimer</button>
                         `;
                         namesList.appendChild(li);
                     });
-                })
-                .catch(error => console.error('Erreur lors du chargement du fichier JSON :', error));
-        }
+                });
+            }
 
-        // Appeler la fonction pour afficher les noms lors du chargement de la page
-        displayNames();
+            // Appeler la fonction pour afficher les noms lors du chargement de la page
+            displayNames();
 
-        // Ajouter un nom au fichier JSON
-        document.getElementById('nameForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('nameInput').value;
-            const newId = namesData.length + 1;
-            namesData.push({ id: newId.toString(), name: name });
-            saveNamesToFile();
-            document.getElementById('nameForm').reset();
+            // Ajouter un nom à la base de données
+            document.getElementById('nameForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('nameInput').value;
+                namesRef.push().set({
+                    name: name
+                }).then(() => {
+                    console.log("Nom ajouté avec succès");
+                }).catch((error) => {
+                    console.error("Erreur lors de l'ajout du nom : ", error);
+                });
+                document.getElementById('nameForm').reset();
+            });
+
+            // Fonction pour éditer un nom
+            window.editName = function(key, oldName) {
+                const newName = prompt("Entrez le nouveau nom :", oldName);
+                if (newName && newName !== oldName) {
+                    namesRef.child(key).set({
+                        name: newName
+                    }).then(() => {
+                        console.log("Nom mis à jour avec succès");
+                    }).catch((error) => {
+                        console.error("Erreur lors de la mise à jour du nom : ", error);
+                    });
+                }
+            }
+
+            // Fonction pour supprimer un nom
+            window.deleteName = function(key) {
+                if (confirm("Voulez-vous vraiment supprimer ce nom ?")) {
+                    namesRef.child(key).remove().then(() => {
+                        console.log("Nom supprimé avec succès");
+                    }).catch((error) => {
+                        console.error("Erreur lors de la suppression du nom : ", error);
+                    });
+                }
+            }
         });
-
-        // Fonction pour éditer un nom dans le fichier JSON
-        function editName(index) {
-            const newName = prompt("Entrez le nouveau nom :", namesData[index].name);
-            if (newName && newName !== namesData[index].name) {
-                namesData[index].name = newName;
-                saveNamesToFile();
-            }
-        }
-
-        // Fonction pour supprimer un nom du fichier JSON
-        function deleteName(index) {
-            if (confirm("Voulez-vous vraiment supprimer ce nom ?")) {
-                namesData.splice(index, 1);
-                saveNamesToFile();
-            }
-        }
-
-        // Fonction pour enregistrer les données dans le fichier JSON
-        function saveNamesToFile() {
-    fetch('https://pronostics-qremion.github.io/data.json', {
-        method: 'POST', // Utilisez POST au lieu de PUT
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ names: namesData })
-    })
-    .then(() => {
-        displayNames(); // Rafraîchir l'affichage après la modification
-        console.log("Données enregistrées avec succès dans le fichier JSON");
-    })
-    .catch(error => console.error('Erreur lors de l\'enregistrement des données :', error));
-}
     </script>
 </body>
 </html>
