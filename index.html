@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter des Noms</title>
-    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.21.0/firebase-database-compat.js"></script>
     <script>
-        // Configuration Firebase
+        // Remplacez par votre configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDI0cbzMu2Vq8L5k8aHsg_DlN44FooQQMU",
             authDomain: "pronostic-8ae12.firebaseapp.com",
@@ -20,7 +20,6 @@
 
         // Initialiser Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
     </script>
 </head>
 <body>
@@ -29,10 +28,33 @@
         <input type="text" id="nameInput" placeholder="Entrez un nom" required>
         <button type="submit">Ajouter</button>
     </form>
+    <ul id="namesList"></ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Référence à la base de données pour les noms
+            const database = firebase.database();
             const namesRef = database.ref('names');
+
+            // Fonction pour afficher les noms
+            function displayNames() {
+                namesRef.on('value', (snapshot) => {
+                    const namesList = document.getElementById('namesList');
+                    namesList.innerHTML = ''; // Vider la liste avant de la remplir
+                    snapshot.forEach((childSnapshot) => {
+                        const key = childSnapshot.key;
+                        const childData = childSnapshot.val();
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>${childData.name}</span>
+                            <button onclick="editName('${key}', '${childData.name}')">Editer</button>
+                            <button onclick="deleteName('${key}')">Supprimer</button>
+                        `;
+                        namesList.appendChild(li);
+                    });
+                });
+            }
+
+            // Appeler la fonction pour afficher les noms lors du chargement de la page
+            displayNames();
 
             // Ajouter un nom à la base de données
             document.getElementById('nameForm').addEventListener('submit', (e) => {
@@ -47,6 +69,31 @@
                 });
                 document.getElementById('nameForm').reset();
             });
+
+            // Fonction pour éditer un nom
+            window.editName = function(key, oldName) {
+                const newName = prompt("Entrez le nouveau nom :", oldName);
+                if (newName && newName !== oldName) {
+                    namesRef.child(key).set({
+                        name: newName
+                    }).then(() => {
+                        console.log("Nom mis à jour avec succès");
+                    }).catch((error) => {
+                        console.error("Erreur lors de la mise à jour du nom : ", error);
+                    });
+                }
+            }
+
+            // Fonction pour supprimer un nom
+            window.deleteName = function(key) {
+                if (confirm("Voulez-vous vraiment supprimer ce nom ?")) {
+                    namesRef.child(key).remove().then(() => {
+                        console.log("Nom supprimé avec succès");
+                    }).catch((error) => {
+                        console.error("Erreur lors de la suppression du nom : ", error);
+                    });
+                }
+            }
         });
     </script>
 </body>
