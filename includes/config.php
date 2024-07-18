@@ -1,5 +1,5 @@
 <?php
-$devel = true; // Change to false for production
+$devel = false; // false for production
 
 if ($devel) {
     $host = "localhost";
@@ -10,7 +10,7 @@ if ($devel) {
     $host = "sql307.infinityfree.com";
     $user = "if0_36891744";
     $password = "tFofe90x5twHgT";
-    $dbname = "if0_36891744_XXX";
+    $dbname = "if0_36891744_pronostics";
 }
 
 $conn = new mysqli($host, $user, $password, $dbname);
