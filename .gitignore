@@ -1,0 +1,21 @@
+# Ignore configuration files created by text editors or IDEs
+/.idea/
+/.vscode/
+/nbproject/
+
+# Ignore composer dependencies
+/vendor/
+
+# Ignore node modules
+/node_modules/
+
+# Ignore log files and temp files
+*.log
+*.tmp
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore environment files
+.env
